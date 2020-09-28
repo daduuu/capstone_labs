@@ -1,4 +1,4 @@
-package day5_bca;
+package BBCA;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,12 +8,12 @@ import java.util.Scanner;
 
 public class ChatClient {
     private static Socket socket;
-    private static BufferedReader socketIn;
+    public static BufferedReader socketIn;
     private static PrintWriter out;
-    
+
     public static void main(String[] args) throws Exception {
         Scanner userInput = new Scanner(System.in);
-        
+
         System.out.println("What's the server IP? ");
         String serverip = userInput.nextLine();
         System.out.println("What's the server port? ");
@@ -25,13 +25,19 @@ public class ChatClient {
         out = new PrintWriter(socket.getOutputStream(), true);
 
         // start a thread to listen for server messages
-        ServerListener listener = new ServerListener();
+        ClientServerHandler listener = new ClientServerHandler();
         Thread t = new Thread(listener);
         t.start();
 
-        System.out.print("Chat sessions has started - enter a user name: ");
+        /*while (!listener.hasName){
+            System.out.print("Enter your name: ");
+            String name = userInput.nextLine().trim();
+            out.println("NAME " + name); //out.flush();
+        }*/
+        System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
-        out.println(name); //out.flush();
+        out.println("NAME " + name); //out.flush();
+
 
         String line = userInput.nextLine().trim();
         while(!line.toLowerCase().startsWith("/quit")) {
@@ -47,25 +53,11 @@ public class ChatClient {
         
     }
 
-    static class ServerListener implements Runnable {
+    public static void name(){
+        Scanner userInput = new Scanner(System.in);
 
-        @Override
-        public void run() {
-            try {
-                String incoming = "";
-
-                while( (incoming = socketIn.readLine()) != null) {
-                    //handle different headers
-                    //WELCOME
-                    //CHAT
-                    //EXIT
-                    System.out.println(incoming);
-                }
-            } catch (Exception ex) {
-                System.out.println("Exception caught in listener - " + ex);
-            } finally{
-                System.out.println("Client Listener exiting");
-            }
-        }
+        System.out.print("Enter your name: ");
+        String name = userInput.nextLine().trim();
+        out.println("NAME " + name); //out.flush();
     }
 }
