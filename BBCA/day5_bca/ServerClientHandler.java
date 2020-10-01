@@ -19,12 +19,13 @@ public class ServerClientHandler implements Runnable{
     /**
      * Broadcasts a message to all clients connected to the server.
      */
-    public void broadcast(String msg) {
+    public void broadcast(String msg, String name, boolean only) {
         try {
             System.out.println("Broadcasting -- " + msg);
             synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
-                    c.getOut().println(msg);
+                    if (c.getUserName().equals(name) == only)
+                        c.getOut().println(msg);
                     // c.getOut().flush();
                 }
             }
@@ -42,7 +43,9 @@ public class ServerClientHandler implements Runnable{
             String userName;
 
             while (!(userName = in.readLine()).startsWith("NAME") || userName.substring(5).trim().equals("hello")){
-                broadcast("SUBMITNAME");
+                synchronized (clientList){
+                    client.getOut().println("SUBMITNAME");
+                }
             }
 
             //get userName, first message from user
@@ -52,7 +55,7 @@ public class ServerClientHandler implements Runnable{
 
             client.setUserName(userName);
             //notify all that client has joined
-            broadcast(String.format("WELCOME %s", client.getUserName()));
+            broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
 
 
             String incoming = "";
@@ -61,13 +64,28 @@ public class ServerClientHandler implements Runnable{
                 System.out.println(incoming);
 
 
+                // default CHAT
                 if (incoming.startsWith("CHAT")) {
                     String chat = incoming.substring(4).trim();
                     if (chat.length() > 0) {
                         String msg = String.format("CHAT %s %s", client.getUserName(), chat);
-                        broadcast(msg);
+                        broadcast(msg, client.getUserName(), false);
                     }
-                } else if (incoming.startsWith("QUIT")){
+                }
+
+                // if it receives PCHAT
+                else if (incoming.startsWith("PCHAT")){
+                    String message = incoming.substring(5).trim();
+                    int index = message.indexOf(" ");
+                    String privUser = message.substring(0,index);
+                    String chat = message.substring(index+1);
+                    if (chat.length() > 0){
+                        String msg = String.format("PCHAT %s %s", client.getUserName(), chat);
+                        broadcast(msg, privUser, true);
+                    }
+                }
+
+                else if (incoming.startsWith("QUIT")){
                     break;
                 }
             }
@@ -85,7 +103,7 @@ public class ServerClientHandler implements Runnable{
                 clientList.remove(client);
             }
             System.out.println(client.getName() + " has left.");
-            broadcast(String.format("EXIT %s", client.getUserName()));
+            broadcast(String.format("EXIT %s", client.getUserName()), "", true);
             try {
                 client.getSocket().close();
             } catch (IOException ex) {}

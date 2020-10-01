@@ -41,7 +41,16 @@ public class ChatClient {
 
         String line = userInput.nextLine().trim();
         while(!line.toLowerCase().startsWith("/quit")) {
-            String msg = String.format("CHAT %s", line); 
+            // default CHAT
+            String msg = String.format("CHAT %s", line);
+
+            // If it is a private PCHAT
+            if (line.startsWith("@")){
+                int index = line.indexOf(" ");
+                String username = line.substring(1,index);
+                msg = String.format("PCHAT %s %s", username, line.substring(index+1));
+            }
+
             out.println(msg);
             line = userInput.nextLine().trim();
         }

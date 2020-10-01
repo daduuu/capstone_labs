@@ -1,7 +1,5 @@
 package BBCA;
 
-import static BBCA.ChatClient.*;
-
 public class ClientServerHandler implements Runnable{
     public boolean hasName = false;
 
@@ -14,7 +12,7 @@ public class ClientServerHandler implements Runnable{
         try {
             String incoming = "";
 
-            while( (incoming = socketIn.readLine()) != null) {
+            while( (incoming = BBCA.ChatClient.socketIn.readLine()) != null) {
                 //handle different headers
                 //WELCOME
                 //CHAT
@@ -24,7 +22,7 @@ public class ClientServerHandler implements Runnable{
 
                 if (incoming.equals("SUBMITNAME")){
                     //System.out.println("SOMETHING IS WRONG");
-                    name();
+                    BBCA.ChatClient.name();
                 }
                 else if (incoming.startsWith("WELCOME")){
                     hasName = true;
@@ -32,11 +30,13 @@ public class ClientServerHandler implements Runnable{
                 }
                 else if (incoming.startsWith("CHAT")){
                     incoming = incoming.substring(5);
-                    String[] list = incoming.split(" ");
-                    System.out.println("NEED CHAT FIXED");
+                    int index = incoming.indexOf(" ");
+                    System.out.println(incoming.substring(0,index) + ": " + incoming.substring(index + 1));
                 }
                 else if (incoming.startsWith("PCHAT")){
-                    //System.out.println("");
+                    incoming = incoming.substring(6);
+                    int index = incoming.indexOf(" ");
+                    System.out.println(incoming.substring(0, index) + "(private): " + incoming.substring(index+1));
                 }
                 else if (incoming.startsWith("EXIT")){
                     System.out.println(incoming.substring(5) + " has left.");
