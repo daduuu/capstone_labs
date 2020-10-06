@@ -7,10 +7,10 @@ Better Basic Chat Bot is a cool bot that utlises java server input output so you
 Download the latest version of java and your favorite compiler. Then download the code files and run them in the compiler
 
 ## Functionality and Usage
-When first loggin in, a SUBMITNAME request will be sent, so you must enter a username, no whitespaces, with all alphanumeric characters, beginning with a \*, such as
+When first loggin in, a SUBMITNAME request will be sent, so you must enter a username, no whitespaces, with all alphanumeric characters, such as:
 
 ```
-*WonjunLee 
+WonjunLee 
 ```
 After that, the client will display and send NAME [name] to the server for processing.
 ```
