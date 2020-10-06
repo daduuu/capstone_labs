@@ -3,7 +3,6 @@ package BBCA;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,13 +23,13 @@ public class ChatServer {
             System.out.println("Local IP: "
                     + Inet4Address.getLocalHost().getHostAddress());
             System.out.println("Local Port: " + serverSocket.getLocalPort());
-        
+
             while (true) {
                 try {
                     Socket socket = serverSocket.accept();
                     System.out.printf("Connected to %s:%d on local port %d\n",
-                        socket.getInetAddress(), socket.getPort(), socket.getLocalPort());
-                    
+                            socket.getInetAddress(), socket.getPort(), socket.getLocalPort());
+
                     // This code should really be done in the separate thread
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -40,7 +39,7 @@ public class ChatServer {
                     synchronized (clientList) {
                         clientList.add(client);
                     }
-                    
+
                     System.out.println("added client " + name);
 
                     //handle client business in another thread
@@ -50,7 +49,7 @@ public class ChatServer {
                 }
 
             }
-        } 
+        }
     }
 
 

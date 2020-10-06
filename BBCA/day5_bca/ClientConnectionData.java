@@ -40,6 +40,16 @@ public class ClientConnectionData {
         return out;
     }
 
+    // return if user is muted
+    public boolean isMute() {
+        return mute;
+    }
+
+    // set user muted or unmuted
+    public void setMute(boolean mute) {
+        this.mute = mute;
+    }
+
     public void setOut(PrintWriter out) {
         this.out = out;
     }
@@ -60,11 +70,5 @@ public class ClientConnectionData {
         this.userName = userName;
     }
 
-    public boolean isMute() {
-        return mute;
-    }
 
-    public void setMute(boolean mute) {
-        this.mute = mute;
-    }
 }
