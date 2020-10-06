@@ -56,7 +56,7 @@ public class ServerClientHandler implements Runnable{
             }
 
 
-            while (userName.startsWith("*") || !unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
+            while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
                 synchronized (clientList){
                     client.getOut().println("SUBMITNAME");
                     temp = in.readLine();

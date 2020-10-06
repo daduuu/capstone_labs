@@ -55,11 +55,7 @@ public class ChatClient {
 
        while(!listener.hasName) {
            String name = userInput.nextLine().trim();
-           if(!name.startsWith("*")){
-               System.out.print("Enter your name: ");
-               continue;
-           }
-           String temp = String.format("NAME %s", name.substring(1));
+           String temp = String.format("NAME %s", name);
            out.println(temp);
        }
 
