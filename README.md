@@ -24,16 +24,19 @@ There are four other messages that the server will display the following to the 
 ```
 CHAT [name] [msg] ---> [name]: [msg]
 PCHAT [name] [msg] ---> [name] (private): [msg]
-MUTE [name] (WRITE DOCUMENTATION ON MUTE)
+MUTE [name] ---> You have been muted by [name]
+MUTED ---> You are muted. Type /unmute to unmute yourself.
+UNMUTE ---> You are unmuted. You can talk now!
 EXIT [name] ---> [name] has left.
 ```
-Chat sends a public messages that displays the name and message. A private chat displays only to the mentioned username the message, along with a private tag to denote that it is private. The mute (WRITE DOCUMENTATION ON MUTE). The exit message exits the server while displaying who has left. 
+Chat sends a public messages that displays the name and message. A private chat displays only to the mentioned username the message, along with a private tag to denote that it is private. The mute will allow the client to mute other users or yourself. After muting someone, it will display to that user that you have muted that user and that user will not be able to talk until he unmutes himself. While the user is muted, no one will be able to see his text, and only he will be able to see that he is muted and has to type /unmute to unmute himself. The exit message exits the server while displaying who has left. 
 
 To make it easier for the client to not have to type out annoying headers, we have shorthands that send the following messages to the server
 ```
 *(during naming) ---> NAME [name]
 *(other times) ---> CHAT [msg]
-SYMBOL ---> MUTE [name]
+/mute username ---> MUTE [username]
+/unmute ---> UNMUTE
 @username * ---> PCHAT [username] [msg]
 /quit  ---> QUIT
 ```
