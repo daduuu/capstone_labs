@@ -16,6 +16,21 @@ public class ServerClientHandler implements Runnable{
         this.client = client;
     }
 
+    private boolean isUnique(String userName, boolean unique) {
+        synchronized (clientList) {
+            if(clientList.size() != 0){
+                for (ClientConnectionData c : clientList) {
+                    if (c.getUserName() == null) {
+                        continue;
+                    } else if (c.getUserName().equals(userName.substring(1))) {
+                        unique = false;
+                    }
+                }
+            }
+        }
+        return unique;
+    }
+
     /**
      * Broadcasts a message to all clients connected to the server.
      */
@@ -43,17 +58,7 @@ public class ServerClientHandler implements Runnable{
             String temp = in.readLine();
             String userName = temp.substring(5).trim();
             boolean unique = true;
-
-            if(clientList.size() != 0){
-                for (ClientConnectionData c : clientList){
-                    if(c.getUserName() == null){
-                        continue;
-                    }
-                    else if(c.getUserName().equals(userName.substring(1))){
-                        unique = false;
-                    }
-                }
-            }
+            unique = isUnique(userName, unique);
 
 
             while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
@@ -61,18 +66,7 @@ public class ServerClientHandler implements Runnable{
                     client.getOut().println("SUBMITNAME");
                     temp = in.readLine();
                     userName = temp.substring(5).trim();
-                    unique = true;
-                    if(clientList.size() != 0){
-                        for (ClientConnectionData c : clientList){
-                            if(c.getUserName() == null){
-                                continue;
-                            }
-                            else if(c.getUserName().equals(userName.substring(1))){
-                                unique = false;
-                            }
-                        }
-                    }
-
+                    unique = isUnique(userName, unique);
 
                 }
             }
@@ -80,7 +74,6 @@ public class ServerClientHandler implements Runnable{
             client.setUserName(userName);
             //notify all that client has joined
             broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
-            client.getOut().printf("WELCOME %s", userName);
 
             String incoming = "";
 
@@ -160,5 +153,7 @@ public class ServerClientHandler implements Runnable{
 
         }
     }
+
+
 
 }
