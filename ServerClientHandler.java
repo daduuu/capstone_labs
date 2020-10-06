@@ -1,92 +1,140 @@
-package chat_message;
+package bbca;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
+
+import static bbca.ChatServer.clientList;
+
 
 public class ServerClientHandler implements Runnable{
-    private static final ArrayList<ClientConnectionData> clientList = new ArrayList<>();
 
+    // Maintain data about the client serviced by this thread
     ClientConnectionData client;
 
     public ServerClientHandler(ClientConnectionData client) {
         this.client = client;
     }
 
-    public void broadcast(String msg){
-
-        try{
+    /**
+     * Broadcasts a message to all clients connected to the server.
+     */
+    public void broadcast(String msg, String name, boolean only) {
+        try {
             System.out.println("Broadcasting -- " + msg);
-            synchronized (clientList){
+            synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
-                    c.getOut().println();
-
+                    if (c.getUserName().equals(name) == only)
+                        c.getOut().println(msg);
+                    // c.getOut().flush();
                 }
             }
-        }
-        catch (Exception e){
-            System.out.println("Broadcast caught exception: " + e);
-            e.printStackTrace();
+        } catch (Exception ex) {
+            System.out.println("broadcast caught exception: " + ex);
+            ex.printStackTrace();
         }
 
     }
 
     @Override
     public void run() {
-        //TODO Message stub
-        try{
-
+        try {
             BufferedReader in = client.getInput();
-            String username = in.readLine().trim();
-            client.setUsername(username);
+            String temp = in.readLine();
+            String userName = temp.substring(5).trim();
+            boolean unique = true;
 
+            if(clientList.size() != 0){
+                for (ClientConnectionData c : clientList){
+                    if(c.getUserName() == null){
+                        continue;
+                    }
+                    else if(c.getUserName().equals(userName.substring(1))){
+                        unique = false;
+                    }
+                }
+            }
+
+
+            while (userName.startsWith("*") || !unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
+                synchronized (clientList){
+                    client.getOut().println("SUBMITNAME");
+                    temp = in.readLine();
+                    userName = temp.substring(5).trim();
+                    unique = true;
+                    if(clientList.size() != 0){
+                        for (ClientConnectionData c : clientList){
+                            if(c.getUserName() == null){
+                                continue;
+                            }
+                            else if(c.getUserName().equals(userName.substring(1))){
+                                unique = false;
+                            }
+                        }
+                    }
+
+
+                }
+            }
+
+            client.setUserName(userName);
             //notify all that client has joined
-            broadcast(String.format("WELCOME %s", client.getUsername()));
+            broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
+            client.getOut().printf("WELCOME %s", userName);
 
 
 
             String incoming = "";
 
-            while((incoming = in.readLine()) != null){
-                //handle messages
+            while( (incoming = in.readLine()) != null) {
+                System.out.println(incoming);
 
-                if(incoming.startsWith("CHAT")){
+
+                // default CHAT
+                if (incoming.startsWith("CHAT")) {
                     String chat = incoming.substring(4).trim();
-                    if(chat.length() > 0){
-                        String msg = String.format("CHAT %s %s", client.getName(), chat);
-                        //broadcast message
-                        broadcast(msg);
+                    if (chat.length() > 0) {
+                        String msg = String.format("CHAT %s %s", client.getUserName(), chat);
+                        broadcast(msg, client.getUserName(), false);
                     }
                 }
-                else if(incoming.startsWith("QUIT")){
+
+                // if it receives PCHAT
+                else if (incoming.startsWith("PCHAT")){
+                    String message = incoming.substring(5).trim();
+                    int index = message.indexOf(" ");
+                    String privUser = message.substring(0,index);
+                    String chat = message.substring(index+1);
+                    if (chat.length() > 0){
+                        String msg = String.format("PCHAT %s %s", client.getUserName(), chat);
+                        broadcast(msg, privUser, true);
+                    }
+                }
+
+                else if (incoming.startsWith("QUIT")){
                     break;
                 }
             }
-        }
-        catch (Exception e){
-            if(e instanceof SocketException){
-                System.out.println("caught socket exception for " + client.getSocket());
+        } catch (Exception ex) {
+            if (ex instanceof SocketException) {
+                System.out.println("Caught socket ex for " +
+                        client.getName());
+            } else {
+                System.out.println(ex);
+                ex.printStackTrace();
             }
-            else{
-                System.out.println(e);
-                e.printStackTrace();
-            }
-        }
-
-        finally {
-            //remove client from clientlist and notifies all
-            synchronized (clientList){
+        } finally {
+            //Remove client from clientList, notify all
+            synchronized (clientList) {
                 clientList.remove(client);
             }
             System.out.println(client.getName() + " has left.");
-            broadcast(String.format("EXIT %s", client.getName()));
-            try{
+            broadcast(String.format("EXIT %s", client.getUserName()), "", true);
+            try {
                 client.getSocket().close();
-            }
-            catch (IOException e){}
+            } catch (IOException ex) {}
+
         }
-
-
     }
+
 }

@@ -1,4 +1,4 @@
-package chat_message;
+package bbca;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -9,26 +9,13 @@ public class ClientConnectionData {
     private BufferedReader input;
     private PrintWriter out;
     private String name;
-    private String username;
-
-
-
-
+    private String userName;
 
     public ClientConnectionData(Socket socket, BufferedReader input, PrintWriter out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
         this.name = name;
-    }
-
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public Socket getSocket() {
@@ -62,4 +49,14 @@ public class ClientConnectionData {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    
 }
