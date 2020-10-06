@@ -54,6 +54,9 @@ public class ChatClient {
         System.out.print("Enter your name: ");
 
        while(!listener.hasName) {
+           if(listener.hasName){
+               break;
+           }
            String name = userInput.nextLine().trim();
            String temp = String.format("NAME %s", name);
            out.println(temp);

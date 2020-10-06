@@ -55,25 +55,6 @@ public class ServerClientHandler implements Runnable{
     public void run() {
         try {
             BufferedReader in = client.getInput();
-            String temp = in.readLine();
-            String userName = temp.substring(5).trim();
-            boolean unique = true;
-            unique = isUnique(userName, unique);
-
-
-            while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
-                synchronized (clientList){
-                    client.getOut().println("SUBMITNAME");
-                    temp = in.readLine();
-                    userName = temp.substring(5).trim();
-                    unique = isUnique(userName, unique);
-
-                }
-            }
-
-            client.setUserName(userName);
-            //notify all that client has joined
-            broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
 
             String incoming = "";
 
@@ -126,6 +107,28 @@ public class ServerClientHandler implements Runnable{
                             }
                         }
                     }
+                }
+
+                else if(incoming.startsWith("NAME")){
+                    String temp = new String(incoming);
+                    String userName = temp.substring(5).trim();
+                    boolean unique = true;
+                    unique = isUnique(userName, unique);
+
+
+                    while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
+                        synchronized (clientList){
+                            client.getOut().println("SUBMITNAME");
+                            temp = in.readLine();
+                            userName = temp.substring(5).trim();
+                            unique = isUnique(userName, unique);
+
+                        }
+                    }
+
+                    client.setUserName(userName);
+                    //notify all that client has joined
+                    broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
                 }
 
                 else if (incoming.startsWith("QUIT")){
