@@ -50,24 +50,19 @@ public class ChatClient {
         }*/
 
 
-        boolean naming = true;
         System.out.print("Enter your name: ");
+        String name = userInput.nextLine().trim();
+        String line = "";
 
-       while(!listener.hasName) {
-           if(listener.hasName){
-               break;
-           }
-           String name = userInput.nextLine().trim();
-           String temp = String.format("NAME %s", name);
-           out.println(temp);
-       }
-
-
-
-
-
-        String line = userInput.nextLine().trim();
         while(!line.toLowerCase().startsWith("/quit")) {
+            while(!listener.isHasName()) {
+                String temp = String.format("NAME %s", name);
+                out.println(temp);
+                name = userInput.nextLine().trim();
+                if(listener.isHasName()){
+                    line = name;
+                }
+            }
             // default CHAT
             String msg = String.format("CHAT %s", line);
 

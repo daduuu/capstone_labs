@@ -3,10 +3,17 @@ package bbca;
 import java.util.Scanner;
 
 public class ClientServerHandler implements Runnable{
-    public boolean hasName = false;
+    private boolean hasName = false;
 
     public ClientServerHandler(){
+    }
 
+    public boolean isHasName() {
+        return hasName;
+    }
+
+    public void setHasName(boolean hasName) {
+        this.hasName = hasName;
     }
 
     @Override
