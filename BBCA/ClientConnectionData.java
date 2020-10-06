@@ -1,4 +1,4 @@
-package day5_bca;
+package BBCA;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -10,12 +10,14 @@ public class ClientConnectionData {
     private PrintWriter out;
     private String name;
     private String userName;
+    private boolean mute;
 
     public ClientConnectionData(Socket socket, BufferedReader input, PrintWriter out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
         this.name = name;
+        this.mute = false;
     }
 
     public Socket getSocket() {
@@ -38,6 +40,16 @@ public class ClientConnectionData {
         return out;
     }
 
+    // return if user is muted
+    public boolean isMute() {
+        return mute;
+    }
+
+    // set user muted or unmuted
+    public void setMute(boolean mute) {
+        this.mute = mute;
+    }
+
     public void setOut(PrintWriter out) {
         this.out = out;
     }
@@ -58,5 +70,5 @@ public class ClientConnectionData {
         this.userName = userName;
     }
 
-    
+
 }
