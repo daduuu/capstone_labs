@@ -10,12 +10,14 @@ public class ClientConnectionData {
     private PrintWriter out;
     private String name;
     private String userName;
+    private boolean mute;
 
     public ClientConnectionData(Socket socket, BufferedReader input, PrintWriter out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
         this.name = name;
+        this.mute = false;
     }
 
     public Socket getSocket() {
@@ -36,6 +38,14 @@ public class ClientConnectionData {
 
     public PrintWriter getOut() {
         return out;
+    }
+
+    public boolean isMute() {
+        return mute;
+    }
+
+    public void setMute(boolean mute) {
+        this.mute = mute;
     }
 
     public void setOut(PrintWriter out) {

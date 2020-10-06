@@ -82,16 +82,24 @@ public class ServerClientHandler implements Runnable{
             broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
             client.getOut().printf("WELCOME %s", userName);
 
-
-
             String incoming = "";
 
             while( (incoming = in.readLine()) != null) {
                 System.out.println(incoming);
 
+                // the client unmute himself or herself.
+                if (incoming.equals("UNMUTE")){
+                    client.setMute(false);
+                    broadcast("UNMUTE", client.getUserName(), true);
+                }
+
+                // if the client is muted, he or she can't talk and would receive message that he or she is muted
+                else if (client.isMute()){
+                    broadcast("MUTED", client.getUserName(), true);
+                }
 
                 // default CHAT
-                if (incoming.startsWith("CHAT")) {
+                else if (incoming.startsWith("CHAT")) {
                     String chat = incoming.substring(4).trim();
                     if (chat.length() > 0) {
                         String msg = String.format("CHAT %s %s", client.getUserName(), chat);
@@ -108,6 +116,22 @@ public class ServerClientHandler implements Runnable{
                     if (chat.length() > 0){
                         String msg = String.format("PCHAT %s %s", client.getUserName(), chat);
                         broadcast(msg, privUser, true);
+                    }
+                }
+
+                // if it receives MUTE
+                else if (incoming.startsWith("MUTE")){
+                    String message = incoming.substring(4).trim();
+                    int index = message.indexOf(" ");
+                    String username = message.substring(index+1);
+                    String msg = String.format("MUTE %s", client.getUserName());
+                    synchronized (clientList) {
+                        for (ClientConnectionData c : clientList){
+                            if (c.getUserName().equals(username)){
+                                c.setMute(true);
+                                c.getOut().println(msg);
+                            }
+                        }
                     }
                 }
 
