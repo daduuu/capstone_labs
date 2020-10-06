@@ -38,6 +38,16 @@ public class ClientServerHandler implements Runnable{
                     int index = incoming.indexOf(" ");
                     System.out.println(incoming.substring(0, index) + "(private): " + incoming.substring(index+1));
                 }
+                else if (incoming.equals("MUTED")){
+                    System.out.println("You are muted. Type /unmute to unmute yourself.");
+                }
+                else if (incoming.startsWith("MUTE")){
+                    incoming = incoming.substring(5);
+                    System.out.println("You have been muted by " + incoming);
+                }
+                else if (incoming.startsWith("UNMUTE")){
+                    System.out.println("You are unmuted. You can talk now!");
+                }
                 else if (incoming.startsWith("EXIT")){
                     System.out.println(incoming.substring(5) + " has left.");
                 }

@@ -51,6 +51,16 @@ public class ChatClient {
                 msg = String.format("PCHAT %s %s", username, line.substring(index+1));
             }
 
+            else if (line.startsWith("/mute")){
+                int index = line.indexOf(" ");
+                String username = line.substring(index + 1);
+                msg = String.format("MUTE %s", username);
+            }
+
+            else if (line.equals("/unmute")){
+                msg = "UNMUTE";
+            }
+
             out.println(msg);
             line = userInput.nextLine().trim();
         }
