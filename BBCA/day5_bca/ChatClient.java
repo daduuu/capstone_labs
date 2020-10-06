@@ -44,7 +44,7 @@ public class ChatClient {
             String msg = String.format("CHAT %s", line);
 
             // check if the client has name
-            if (!listener.hasName){
+            if (!listener.isHasName()){
                 msg = String.format("NAME %s", line);
             }
 

@@ -1,7 +1,11 @@
 package BBCA;
 
 public class ClientServerHandler implements Runnable{
-    public boolean hasName = false;
+    private boolean hasName = false;
+
+    public boolean isHasName() {
+        return hasName;
+    }
 
     public ClientServerHandler(){
 
