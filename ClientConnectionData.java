@@ -1,4 +1,4 @@
-package BBCA;
+package bbca;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -40,12 +40,10 @@ public class ClientConnectionData {
         return out;
     }
 
-    // return if user is muted
     public boolean isMute() {
         return mute;
     }
 
-    // set user muted or unmuted
     public void setMute(boolean mute) {
         this.mute = mute;
     }
@@ -70,5 +68,5 @@ public class ClientConnectionData {
         this.userName = userName;
     }
 
-
+    
 }
