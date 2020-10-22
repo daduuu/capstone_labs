@@ -36,9 +36,9 @@ public class ServerClientHandler implements Runnable{
     /**
      * Broadcasts a message to all clients connected to the server.
      */
-    public void broadcast(String msg, String name, boolean only) {
+    public void broadcast(Message msg, String name, boolean only) {
         try {
-            System.out.println("Broadcasting -- " + msg);
+            System.out.println("Broadcasting -- " + msg.getMsg());
             synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
                     if (c.getUserName().equals(name) == only)
@@ -58,49 +58,47 @@ public class ServerClientHandler implements Runnable{
         try {
             ObjectInputStream in = client.getInput();
 
-            String incoming = "";
+            Message incoming;
 
-            while( (incoming = (String) in.readObject()) != null) {
-                System.out.println(incoming);
+            while( (incoming = (Message) in.readObject()) != null) {
 
                 // the client unmute himself or herself.
-                if (incoming.equals("UNMUTE")){
+                if (incoming.getMsgHeader() == Message.MSG_UNMUTE){
                     client.setMute(false);
-                    broadcast("UNMUTE", client.getUserName(), true);
+                    broadcast(new Message("UNMUTE", Message.MSG_UNMUTE), client.getUserName(), true);
                 }
 
                 // if the client is muted, he or she can't talk and would receive message that he or she is muted
                 else if (client.isMute()){
-                    broadcast("MUTED", client.getUserName(), true);
+                    broadcast(new Message("MUTED", Message.MSG_IS_MUTED), client.getUserName(), true);
                 }
 
                 // default CHAT
-                else if (incoming.startsWith("CHAT")) {
-                    String chat = incoming.substring(4).trim();
+                else if (incoming.getMsgHeader() == Message.MSG_CHAT) {
+                    String chat = incoming.getMsg().substring(4).trim();
                     if (chat.length() > 0) {
-                        String msg = String.format("CHAT %s %s", client.getUserName(), chat);
-                        broadcast(msg, client.getUserName(), false);
+                        broadcast(new Message(String.format("CHAT %s %s", client.getUserName(), chat), Message.MSG_CHAT), client.getUserName(), false);
                     }
                 }
 
                 // if it receives PCHAT
-                else if (incoming.startsWith("PCHAT")){
-                    String message = incoming.substring(5).trim();
+                else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
+                    String message = incoming.getMsg().substring(5).trim();
                     int index = message.indexOf(" ");
                     String privUser = message.substring(0,index);
                     String chat = message.substring(index+1);
                     if (chat.length() > 0){
-                        String msg = String.format("PCHAT %s %s", client.getUserName(), chat);
-                        broadcast(msg, privUser, true);
+                        broadcast(new Message(String.format("PCHAT %s %s", client.getUserName(), chat), Message.MSG_PCHAT), privUser, true);
                     }
                 }
 
                 // if it receives MUTE
-                else if (incoming.startsWith("MUTE")){
-                    String message = incoming.substring(4).trim();
+                else if (incoming.getMsgHeader() == Message.MSG_MUTE){
+                    String message = incoming.getMsg().substring(4).trim();
                     int index = message.indexOf(" ");
                     String username = message.substring(index+1);
-                    String msg = String.format("MUTE %s", client.getUserName());
+
+                    Message msg = new Message(String.format("MUTE %s", client.getUserName()), Message.MSG_MUTE);
                     synchronized (clientList) {
                         for (ClientConnectionData c : clientList){
                             if (c.getUserName().equals(username)){
@@ -111,8 +109,8 @@ public class ServerClientHandler implements Runnable{
                     }
                 }
 
-                else if(incoming.startsWith("NAME")){
-                    String temp = new String(incoming);
+                else if(incoming.getMsgHeader() == Message.MSG_NAME){
+                    String temp = incoming.getMsg();
                     String userName = temp.substring(5).trim();
                     boolean unique = true;
                     unique = isUnique(userName, unique);
@@ -120,8 +118,8 @@ public class ServerClientHandler implements Runnable{
 
                     while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
                         synchronized (clientList){
-                            client.getOut().writeObject("SUBMITNAME");
-                            temp = (String) in.readObject();
+                            client.getOut().writeObject(new Message("SUBMITNAME", Message.MSG_SUBMITNAME));
+                            temp = ((Message) in.readObject()).getMsg();
                             userName = temp.substring(5).trim();
                             unique = isUnique(userName, unique);
 
@@ -130,10 +128,10 @@ public class ServerClientHandler implements Runnable{
 
                     client.setUserName(userName);
                     //notify all that client has joined
-                    broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
+                    broadcast(new Message(String.format("WELCOME %s", client.getUserName()), Message.MSG_WELCOME), "", false);
                 }
 
-                else if (incoming.startsWith("QUIT")){
+                else if (incoming.getMsgHeader() == Message.MSG_QUIT){
                     break;
                 }
             }
@@ -151,7 +149,7 @@ public class ServerClientHandler implements Runnable{
                 clientList.remove(client);
             }
             System.out.println(client.getName() + " has left.");
-            broadcast(String.format("EXIT %s", client.getUserName()), "", true);
+            broadcast(new Message(String.format("QUIT %s", client.getUserName()), Message.MSG_QUIT), "", true);
             try {
                 client.getSocket().close();
             } catch (IOException ex) {}

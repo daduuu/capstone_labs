@@ -3,7 +3,7 @@ package bbca;
 import java.io.*;
 import java.net.Socket;
 
-public class ClientConnectionData extends Message implements Serializable {
+public class ClientConnectionData implements Serializable {
     public static final long serialVersionUID = 1L;
 
     private Socket socket;

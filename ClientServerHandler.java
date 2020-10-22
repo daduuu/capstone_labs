@@ -19,9 +19,9 @@ public class ClientServerHandler implements Runnable{
     @Override
     public void run() {
         try {
-            String incoming = "";
+            Message incoming;
 
-            while( (incoming = (String) bbca.ChatClient.getSocketIn().readObject()) != null) {
+            while( (incoming = (Message) bbca.ChatClient.getSocketIn().readObject()) != null) {
                 //handle different headers
                 //WELCOME
                 //CHAT
@@ -29,35 +29,35 @@ public class ClientServerHandler implements Runnable{
                 //System.out.println(incoming);
 
 
-                if (incoming.equals("SUBMITNAME")){
+                if (incoming.getMsgHeader() == Message.MSG_SUBMITNAME){
                     System.out.print("Enter your name: ");
                 }
-                else if (incoming.startsWith("WELCOME")){
+                else if (incoming.getMsgHeader() == Message.MSG_WELCOME){
                     hasName = true;
-                    System.out.println(incoming.substring(8) + " has joined.");
+                    System.out.println(incoming.getMsg().substring(8) + " has joined.");
                 }
-                else if (incoming.startsWith("CHAT")){
-                    incoming = incoming.substring(5);
-                    int index = incoming.indexOf(" ");
-                    System.out.println(incoming.substring(0,index) + ": " + incoming.substring(index + 1));
+                else if (incoming.getMsgHeader() == Message.MSG_CHAT){
+                    String temp = incoming.getMsg().substring(5);
+                    int index = temp.indexOf(" ");
+                    System.out.println(temp.substring(0,index) + ": " + temp.substring(index + 1));
                 }
-                else if (incoming.startsWith("PCHAT")){
-                    incoming = incoming.substring(6);
-                    int index = incoming.indexOf(" ");
-                    System.out.println(incoming.substring(0, index) + "(private): " + incoming.substring(index+1));
+                else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
+                    String temp = incoming.getMsg().substring(6);
+                    int index = temp.indexOf(" ");
+                    System.out.println(temp.substring(0, index) + "(private): " + temp.substring(index+1));
                 }
-                else if (incoming.equals("MUTED")){
+                else if (incoming.getMsgHeader() == Message.MSG_IS_MUTED){
                     System.out.println("You are muted. Type /unmute to unmute yourself.");
                 }
-                else if (incoming.startsWith("MUTE")){
-                    incoming = incoming.substring(5);
-                    System.out.println("You have been muted by " + incoming);
+                else if (incoming.getMsgHeader() == Message.MSG_MUTE){
+                    String temp = incoming.getMsg().substring(5);
+                    System.out.println("You have been muted by " + temp);
                 }
-                else if (incoming.startsWith("UNMUTE")){
+                else if (incoming.getMsgHeader() == Message.MSG_UNMUTE){
                     System.out.println("You are unmuted. You can talk now!");
                 }
-                else if (incoming.startsWith("EXIT")){
-                    System.out.println(incoming.substring(5) + " has left.");
+                else if (incoming.getMsgHeader() == Message.MSG_QUIT){
+                    System.out.println(incoming.getMsg().substring(5) + " has left.");
                 }
                 //System.out.println(incoming);
             }
