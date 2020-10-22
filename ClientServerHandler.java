@@ -21,7 +21,7 @@ public class ClientServerHandler implements Runnable{
         try {
             String incoming = "";
 
-            while( (incoming = bbca.ChatClient.getSocketIn().readLine()) != null) {
+            while( (incoming = (String) bbca.ChatClient.getSocketIn().readObject()) != null) {
                 //handle different headers
                 //WELCOME
                 //CHAT

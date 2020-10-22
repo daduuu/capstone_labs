@@ -1,15 +1,14 @@
 package bbca;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatClient {
     private static Socket socket;
-    private static BufferedReader socketIn;
-    private static PrintWriter out;
+    private static ObjectOutputStream out;
+    private static ObjectInputStream socketIn;
+
 
 
 
@@ -17,13 +16,15 @@ public class ChatClient {
         return socket;
     }
 
-    public static BufferedReader getSocketIn() {
+    public static ObjectOutputStream  getOut() {
+        return out;
+    }
+
+    public static ObjectInputStream  getSocketIn() {
         return socketIn;
     }
 
-    public static PrintWriter getOut() {
-        return out;
-    }
+
 
     public static void main(String[] args) throws Exception {
         Scanner userInput = new Scanner(System.in);
@@ -35,8 +36,9 @@ public class ChatClient {
         userInput.nextLine();
 
         socket = new Socket(serverip, port);
-        socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        socketIn = new ObjectInputStream(socket.getInputStream());
+
 
         // start a thread to listen for server messages
         ClientServerHandler listener = new ClientServerHandler();
@@ -57,7 +59,7 @@ public class ChatClient {
         while(!line.toLowerCase().startsWith("/quit")) {
             while(!listener.isHasName()) {
                 String temp = String.format("NAME %s", name);
-                out.println(temp);
+                out.writeObject(temp);
                 name = userInput.nextLine().trim();
                 if(listener.isHasName()){
                     line = name;
@@ -83,10 +85,10 @@ public class ChatClient {
                 msg = "UNMUTE";
             }
 
-            out.println(msg);
+            out.writeObject(msg);
             line = userInput.nextLine().trim();
         }
-        out.println("QUIT");
+        out.writeObject("QUIT");
         out.close();
         userInput.close();
         socketIn.close();

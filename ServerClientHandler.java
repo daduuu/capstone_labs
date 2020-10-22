@@ -2,6 +2,8 @@ package bbca;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.SocketException;
 
 import static bbca.ChatServer.clientList;
@@ -40,7 +42,7 @@ public class ServerClientHandler implements Runnable{
             synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
                     if (c.getUserName().equals(name) == only)
-                        c.getOut().println(msg);
+                        c.getOut().writeObject(msg);
                     // c.getOut().flush();
                 }
             }
@@ -54,11 +56,11 @@ public class ServerClientHandler implements Runnable{
     @Override
     public void run() {
         try {
-            BufferedReader in = client.getInput();
+            ObjectInputStream in = client.getInput();
 
             String incoming = "";
 
-            while( (incoming = in.readLine()) != null) {
+            while( (incoming = (String) in.readObject()) != null) {
                 System.out.println(incoming);
 
                 // the client unmute himself or herself.
@@ -103,7 +105,7 @@ public class ServerClientHandler implements Runnable{
                         for (ClientConnectionData c : clientList){
                             if (c.getUserName().equals(username)){
                                 c.setMute(true);
-                                c.getOut().println(msg);
+                                c.getOut().writeObject(msg);
                             }
                         }
                     }
@@ -118,8 +120,8 @@ public class ServerClientHandler implements Runnable{
 
                     while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
                         synchronized (clientList){
-                            client.getOut().println("SUBMITNAME");
-                            temp = in.readLine();
+                            client.getOut().writeObject("SUBMITNAME");
+                            temp = (String) in.readObject();
                             userName = temp.substring(5).trim();
                             unique = isUnique(userName, unique);
 
