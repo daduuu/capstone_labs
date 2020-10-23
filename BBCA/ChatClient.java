@@ -1,18 +1,27 @@
-package BBCA;
+package BBCA3;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatClient {
     private static Socket socket;
-    private static BufferedReader socketIn;
-    private static PrintWriter out;
+    private static ObjectInputStream socketIn;
+    private static ObjectOutputStream out;
 
-    public static BufferedReader getSocketIn() {
+
+
+    public static Socket getSocket() {
+        return socket;
+    }
+
+    public static ObjectInputStream getSocketIn() {
         return socketIn;
+    }
+
+    public static ObjectOutputStream getOut() {
+        return out;
     }
 
     public static void main(String[] args) throws Exception {
@@ -25,53 +34,85 @@ public class ChatClient {
         userInput.nextLine();
 
         socket = new Socket(serverip, port);
-        socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        socketIn = new ObjectInputStream(socket.getInputStream());
+        out = new ObjectOutputStream(socket.getOutputStream());
 
         // start a thread to listen for server messages
         ClientServerHandler listener = new ClientServerHandler();
         Thread t = new Thread(listener);
         t.start();
 
+        /*while (!listener.hasName){
+            System.out.print("Enter your name: ");
+            String name = userInput.nextLine().trim();
+            out.println("NAME " + name); //out.flush();
+        }*/
+
+
+        out.println("LIST");
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
-        String temp = String.format("NAME %s", name);
-        out.println(temp);
+        String line = "";
 
-        String line = userInput.nextLine().trim();
         while(!line.toLowerCase().startsWith("/quit")) {
+            while(!listener.isHasName()) {
+                String temp = String.format("NAME %s", name);
+                out.writeObject(temp);
+                name = userInput.nextLine().trim();
+                if(listener.isHasName()){
+                    line = name;
+                }
+            }
             // default CHAT
             String msg = String.format("CHAT %s", line);
 
-            // check if the client has name
-            if (!listener.isHasName()){
-                msg = String.format("NAME %s", line);
-            }
+            // If it is a private PCHAT
+            if (line.startsWith("@")){
+                String[] list = line.split(" ");
+                int numUsers = 0;
+                int index = 0;
+                for (int i = 0; i < list.length; i++){
+                    if (list[i].startsWith("@")){
+                        numUsers++;
+                        index += list[i].length();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                String chat = line.substring(index+1);
+                for (int i = 0; i < numUsers; i++){
+                    msg = String.format("PCHAT %s %s", list[i].substring(1), chat);
+                    out.writeObject(msg);
+                }
 
-            // Check if it is a private PCHAT
-            else if (line.startsWith("@")){
-                int index = line.indexOf(" ");
+                /*int index = line.indexOf(" ");
                 String username = line.substring(1,index);
-                msg = String.format("PCHAT %s %s", username, line.substring(index+1));
+                msg = String.format("PCHAT %s %s", username, line.substring(index+1));*/
             }
 
-            // check if the user has typed to mute someone
             else if (line.startsWith("/mute")){
                 int index = line.indexOf(" ");
                 String username = line.substring(index + 1);
                 msg = String.format("MUTE %s", username);
+                out.writeObject(msg);
             }
 
-            // check if user wants to unmute himself or herself
             else if (line.equals("/unmute")){
                 msg = "UNMUTE";
+                out.writeObject(msg);
             }
 
-            // send the message out to server
-            out.println(msg);
+            else if (line.equals("/whoishere")){
+                System.out.println(listener.getList());
+            }
+            else {
+                out.writeObject(msg);
+            }
+
             line = userInput.nextLine().trim();
         }
-        out.println("QUIT");
+        out.writeObject("QUIT");
         out.close();
         userInput.close();
         socketIn.close();

@@ -1,5 +1,4 @@
-package BBCA;
-
+package BBCA3;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,36 +16,35 @@ public class ServerClientHandler implements Runnable{
         this.client = client;
     }
 
-    // check if no one else has the username
-    private boolean isUnique(String userName) {
+    private boolean isUnique(String userName, boolean unique) {
         synchronized (clientList) {
             if(clientList.size() != 0){
                 for (ClientConnectionData c : clientList) {
                     if (c.getUserName() == null) {
                         continue;
-                    } else if (c.getUserName().equals(userName)) {
-                            return false;
+                    } else if (c.getUserName().equals(userName.substring(1))) {
+                        unique = false;
                     }
                 }
             }
         }
-        return true;
+        return unique;
     }
 
     /**
-     * Broadcasts a message to specific clients connected to the server.
-     *
-     * If  boolean only is true, it sends message to only the client with String name
-     *
-     * If not, send message to all the clients except the client with String name
+     * Broadcasts a message to all clients connected to the server.
      */
     public void broadcast(String msg, String name, boolean only) {
         try {
             System.out.println("Broadcasting -- " + msg);
             synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
-                    if (c.getUserName().equals(name) == only)
+                    if (c.getUserName().equals(name) == only) {
                         c.getOut().println(msg);
+                        if (only){
+                            break;
+                        }
+                    }
                     // c.getOut().flush();
                 }
             }
@@ -57,30 +55,36 @@ public class ServerClientHandler implements Runnable{
 
     }
 
+    public void list(){
+        String message = "LIST: ";
+        synchronized (clientList){
+            for (ClientConnectionData c: clientList){
+                if (c.getUserName() != null){
+                    message += c.getUserName() + ", ";
+                }
+            }
+            message = message.substring(0, message.length()-2);
+            System.out.println("Broadcasting -- " + message);
+            for (ClientConnectionData c: clientList){
+                if (c.getUserName() != null){
+                    c.getOut().println(message);
+                }
+            }
+        }
+    }
+
     @Override
     public void run() {
         try {
             BufferedReader in = client.getInput();
 
             String incoming = "";
+
             while( (incoming = in.readLine()) != null) {
-                System.out.println(incoming);
+                //System.out.println(incoming);
 
-                // check if client sent name
-                if (incoming.startsWith("NAME")){
-                    String userName = incoming.substring(5).trim();
-
-                    // check if it is a valid name
-                    if (userName.length() != 0 && !userName.contains(" ") && isUnique(userName) && userName.matches("[A-Za-z0-9]+")){
-                        client.setUserName(userName);
-                        broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
-                    }
-
-                    // request the user to send name again
-                    else {
-                        System.out.println("Broadcasting -- SUBMITNAME");
-                        client.getOut().println("SUBMITNAME");
-                    }
+                if (incoming.equals("LIST")){
+                    list();
                 }
 
                 // the client unmute himself or herself.
@@ -108,7 +112,7 @@ public class ServerClientHandler implements Runnable{
                     String message = incoming.substring(5).trim();
                     int index = message.indexOf(" ");
                     String privUser = message.substring(0,index);
-                    String chat = message.substring(index+1);
+                    String chat = message.substring(index+1).trim();
                     if (chat.length() > 0){
                         String msg = String.format("PCHAT %s %s", client.getUserName(), chat);
                         broadcast(msg, privUser, true);
@@ -121,17 +125,37 @@ public class ServerClientHandler implements Runnable{
                     int index = message.indexOf(" ");
                     String username = message.substring(index+1);
                     String msg = String.format("MUTE %s", client.getUserName());
-
-                    // mute client with String username
                     synchronized (clientList) {
                         for (ClientConnectionData c : clientList){
                             if (c.getUserName().equals(username)){
-                                System.out.println("Broadcasting -- MUTE");
                                 c.setMute(true);
                                 c.getOut().println(msg);
                             }
                         }
                     }
+                }
+
+                else if(incoming.startsWith("NAME")){
+                    String temp = new String(incoming);
+                    String userName = temp.substring(5).trim();
+                    boolean unique = true;
+                    unique = isUnique(userName, unique);
+
+
+                    while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
+                        synchronized (clientList){
+                            client.getOut().println("SUBMITNAME");
+                            temp = in.readLine();
+                            userName = temp.substring(5).trim();
+                            unique = isUnique(userName, unique);
+
+                        }
+                    }
+
+                    client.setUserName(userName);
+                    //notify all that client has joined
+                    broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
+                    list();
                 }
 
                 else if (incoming.startsWith("QUIT")){
@@ -152,7 +176,8 @@ public class ServerClientHandler implements Runnable{
                 clientList.remove(client);
             }
             System.out.println(client.getName() + " has left.");
-            broadcast(String.format("EXIT %s", client.getUserName()), "", false);
+            broadcast(String.format("EXIT %s", client.getUserName()), "", true);
+            list();
             try {
                 client.getSocket().close();
             } catch (IOException ex) {}
