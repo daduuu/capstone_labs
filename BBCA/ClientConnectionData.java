@@ -1,18 +1,17 @@
-package bbca;
+package BBCA;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
-public class ClientConnectionData {
+public class ClientConnectionData implements Serializable{
     private Socket socket;
-    private BufferedReader input;
-    private PrintWriter out;
+    private ObjectInputStream input;
+    private ObjectOutputStream out;
     private String name;
     private String userName;
     private boolean mute;
 
-    public ClientConnectionData(Socket socket, BufferedReader input, PrintWriter out, String name) {
+    public ClientConnectionData(Socket socket, ObjectInputStream input, ObjectOutputStream out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
@@ -28,15 +27,15 @@ public class ClientConnectionData {
         this.socket = socket;
     }
 
-    public BufferedReader getInput() {
+    public ObjectInputStream getInput() {
         return input;
     }
 
-    public void setInput(BufferedReader input) {
+    public void setInput(ObjectInputStream input) {
         this.input = input;
     }
 
-    public PrintWriter getOut() {
+    public ObjectOutputStream getOut() {
         return out;
     }
 
@@ -48,7 +47,7 @@ public class ClientConnectionData {
         this.mute = mute;
     }
 
-    public void setOut(PrintWriter out) {
+    public void setOut(ObjectOutputStream out) {
         this.out = out;
     }
 
@@ -68,5 +67,5 @@ public class ClientConnectionData {
         this.userName = userName;
     }
 
-    
+
 }

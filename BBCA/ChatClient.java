@@ -1,15 +1,13 @@
-package bbca;
+package BBCA;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatClient {
     private static Socket socket;
-    private static BufferedReader socketIn;
-    private static PrintWriter out;
+    private static ObjectInputStream socketIn;
+    private static ObjectOutputStream out;
 
 
 
@@ -17,11 +15,11 @@ public class ChatClient {
         return socket;
     }
 
-    public static BufferedReader getSocketIn() {
+    public static ObjectInputStream getSocketIn() {
         return socketIn;
     }
 
-    public static PrintWriter getOut() {
+    public static ObjectOutputStream getOut() {
         return out;
     }
 
@@ -35,8 +33,8 @@ public class ChatClient {
         userInput.nextLine();
 
         socket = new Socket(serverip, port);
-        socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
+        socketIn = new ObjectInputStream(socket.getInputStream());
+        out = new ObjectOutputStream(socket.getOutputStream());
 
         // start a thread to listen for server messages
         ClientServerHandler listener = new ClientServerHandler();
@@ -50,48 +48,74 @@ public class ChatClient {
         }*/
 
 
+        //out.writeObject(new Message("LIST", Message.MSG_LIST));
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
         String line = "";
+        Message m;
 
         while(!line.toLowerCase().startsWith("/quit")) {
             while(!listener.isHasName()) {
-                String temp = String.format("NAME %s", name);
-                out.println(temp);
+                m = new Message(name, Message.MSG_NAME);
+                out.writeObject(m);
                 name = userInput.nextLine().trim();
                 if(listener.isHasName()){
                     line = name;
                 }
             }
             // default CHAT
-            String msg = String.format("CHAT %s", line);
+            m = new Message(line, Message.MSG_CHAT);
 
             // If it is a private PCHAT
             if (line.startsWith("@")){
-                int index = line.indexOf(" ");
-                String username = line.substring(1,index);
-                msg = String.format("PCHAT %s %s", username, line.substring(index+1));
+                String[] list = line.split(" ");
+                int numUsers = 0;
+                int index = 0;
+                for (int i = 0; i < list.length; i++){
+                    if (list[i].startsWith("@")){
+                        numUsers++;
+                        index += list[i].length();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                if (index < line.length()){
+                    String chat = line.substring(index+1);
+                    for (int i = 0; i < numUsers; i++){
+                        m = new Message(String.format("%s %s", list[i].substring(1), chat), Message.MSG_PCHAT);
+                        out.writeObject(m);
+                    }
+                }
             }
 
             else if (line.startsWith("/mute")){
                 int index = line.indexOf(" ");
                 String username = line.substring(index + 1);
-                msg = String.format("MUTE %s", username);
+                m = new Message(username, Message.MSG_MUTE);
+                out.writeObject(m);
             }
 
             else if (line.equals("/unmute")){
-                msg = "UNMUTE";
+                m = new Message("", Message.MSG_UNMUTE);
+                out.writeObject(m);
             }
 
-            out.println(msg);
+            else if (line.equals("/whoishere")){
+                System.out.println(listener.getList());
+            }
+            else {
+                out.writeObject(m);
+            }
+
             line = userInput.nextLine().trim();
         }
-        out.println("QUIT");
+        out.writeObject(new Message("", Message.MSG_QUIT));
         out.close();
         userInput.close();
         socketIn.close();
         socket.close();
-        
+
     }
 
 
