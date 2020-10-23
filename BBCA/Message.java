@@ -27,6 +27,7 @@ public class Message implements Serializable {
         this.msgHeader = msgHeader;
     }
 
+    // get name of the message header
     public String getMsgHeaderName(int id){
         switch (id){
             case 0:

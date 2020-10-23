@@ -56,6 +56,7 @@ public class ServerClientHandler implements Runnable{
 
     }
 
+    // update list of users in all clients
     public void list(){
         try{
             String message = "LIST: ";
@@ -145,7 +146,7 @@ public class ServerClientHandler implements Runnable{
                     boolean unique = true;
                     unique = isUnique(userName, unique);
 
-
+                    // check if the username is valid
                     while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
                         synchronized (clientList){
                             client.getOut().writeObject(new Message("", Message.MSG_SUBMITNAME));

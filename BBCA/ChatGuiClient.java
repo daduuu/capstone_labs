@@ -108,6 +108,7 @@ public class ChatGuiClient extends Application {
         this.stage = primaryStage;
         BorderPane borderPane = new BorderPane();
 
+        // list of users currently in server (right side pane with current users)
         userList = new TextArea();
         userList.setWrapText(true);
         userList.setEditable(false);
@@ -125,10 +126,10 @@ public class ChatGuiClient extends Application {
         sendButton = new Button("Send");
         sendButton.setDisable(true);
         sendButton.setOnAction(e -> sendMessage());
-        muteButton = new Button("Mute");
+        muteButton = new Button("Mute"); // create mute button
         muteButton.setDisable(true);
         muteButton.setOnAction(e -> mute());
-        unmuteButton = new Button("Unmute");
+        unmuteButton = new Button("Unmute"); // create unmute button
         unmuteButton.setDisable(true);
         unmuteButton.setOnAction(e -> unmute());
 
@@ -196,6 +197,7 @@ public class ChatGuiClient extends Application {
         }
     }
 
+    // when mute button is clicked ... 
     private void mute() {
         try{
             String name = muteWindow();
@@ -206,6 +208,7 @@ public class ChatGuiClient extends Application {
 
     }
 
+    // create mute window for username to be typed and mute that user
     private String muteWindow() {
 
         TextInputDialog nameDialog = new TextInputDialog();
@@ -217,6 +220,7 @@ public class ChatGuiClient extends Application {
         return name.get().trim();
     }
 
+    // unmute yourself when unmute button is clicked
     private void unmute() {
         try{
             out.writeObject(new Message("", Message.MSG_UNMUTE));
@@ -359,21 +363,21 @@ public class ChatGuiClient extends Application {
                             });
                         }
 
-                    } else if (incoming.equals("UNMUTE")){
-                        Platform.runLater(() -> {
+                    } else if (incoming.equals("UNMUTE")){ 
+                        Platform.runLater(() -> { // confirm you have unmuted yourself
                             messageArea.appendText("You are unmuted. You can talk!\n");
                         });
-                    } else if (incoming.getMsgHeader() == Message.MSG_MUTE){
+                    } else if (incoming.getMsgHeader() == Message.MSG_MUTE){ // someone muted you and you received message from server
                         String name = incoming.getMsg();
                         Platform.runLater(() -> {
                             messageArea.appendText("You are muted by " + name + ".\n");
                         });
-                        unmuteButton.setDisable(false);
+                        unmuteButton.setDisable(false); // unmute button is now enabled and able to be clicked
                     } else if (incoming.getMsgHeader() == Message.MSG_IS_MUTED) {
                         Platform.runLater(() -> {
                             messageArea.appendText("You are muted. Click unmute button to unmute yourself.\n");
                         });
-                    } else if (incoming.getMsgHeader() == Message.MSG_CHAT) {
+                    } else if (incoming.getMsgHeader() == Message.MSG_CHAT) { // normal chat message received
                         int split = incoming.getMsg().indexOf(" ");
                         String user = incoming.getMsg().substring(0, split);
                         String msg = incoming.getMsg().substring(split + 1);
@@ -381,7 +385,7 @@ public class ChatGuiClient extends Application {
                         Platform.runLater(() -> {
                             messageArea.appendText(user + ": " + msg + "\n");
                         });
-                    } else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
+                    } else if (incoming.getMsgHeader() == Message.MSG_PCHAT){ // private chat received
                         String str = incoming.getMsg();
                         int index = str.indexOf(" ");
                         String user = str.substring(0, index);
@@ -391,13 +395,13 @@ public class ChatGuiClient extends Application {
                             messageArea.appendText(user + " (private): " + msg + "\n");
                         });
                     }
-                    else if (incoming.getMsgHeader() == Message.MSG_QUIT) {
+                    else if (incoming.getMsgHeader() == Message.MSG_QUIT) { // someone has left
                         String user = incoming.getMsg();
                         Platform.runLater(() -> {
                             messageArea.appendText(user + " has left the chatroom.\n");
                         });
                     }
-                    else if (incoming.getMsgHeader() == Message.MSG_LIST){
+                    else if (incoming.getMsgHeader() == Message.MSG_LIST){ // update list of users
                         String incomingstr = incoming.getMsg().substring(6);
                         String[] users = incomingstr.split(", ");
                         String list = "";

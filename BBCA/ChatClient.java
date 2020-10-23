@@ -41,13 +41,6 @@ public class ChatClient {
         Thread t = new Thread(listener);
         t.start();
 
-        /*while (!listener.hasName){
-            System.out.print("Enter your name: ");
-            String name = userInput.nextLine().trim();
-            out.println("NAME " + name); //out.flush();
-        }*/
-
-
         //out.writeObject(new Message("LIST", Message.MSG_LIST));
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
@@ -80,6 +73,7 @@ public class ChatClient {
                         break;
                     }
                 }
+                // PCHAT multiple recipients
                 if (index < line.length()){
                     String chat = line.substring(index+1);
                     for (int i = 0; i < numUsers; i++){
@@ -89,6 +83,7 @@ public class ChatClient {
                 }
             }
 
+            // mute someone
             else if (line.startsWith("/mute")){
                 int index = line.indexOf(" ");
                 String username = line.substring(index + 1);
@@ -96,14 +91,18 @@ public class ChatClient {
                 out.writeObject(m);
             }
 
+            // unmute yourself
             else if (line.equals("/unmute")){
                 m = new Message("", Message.MSG_UNMUTE);
                 out.writeObject(m);
             }
 
+            // list users currently in server
             else if (line.equals("/whoishere")){
                 System.out.println(listener.getList());
             }
+
+            // where CHAT is actually sent to server
             else {
                 out.writeObject(m);
             }
