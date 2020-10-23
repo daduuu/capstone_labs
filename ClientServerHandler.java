@@ -34,15 +34,15 @@ public class ClientServerHandler implements Runnable{
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_WELCOME){
                     hasName = true;
-                    System.out.println(incoming.getMsg().substring(8) + " has joined.");
+                    System.out.println(incoming.getMsg() + " has joined.");
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_CHAT){
-                    String temp = incoming.getMsg().substring(5);
+                    String temp = incoming.getMsg();
                     int index = temp.indexOf(" ");
                     System.out.println(temp.substring(0,index) + ": " + temp.substring(index + 1));
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
-                    String temp = incoming.getMsg().substring(6);
+                    String temp = incoming.getMsg();
                     int index = temp.indexOf(" ");
                     System.out.println(temp.substring(0, index) + "(private): " + temp.substring(index+1));
                 }
@@ -50,14 +50,14 @@ public class ClientServerHandler implements Runnable{
                     System.out.println("You are muted. Type /unmute to unmute yourself.");
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_MUTE){
-                    String temp = incoming.getMsg().substring(5);
+                    String temp = incoming.getMsg();
                     System.out.println("You have been muted by " + temp);
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_UNMUTE){
                     System.out.println("You are unmuted. You can talk now!");
                 }
                 else if (incoming.getMsgHeader() == Message.MSG_QUIT){
-                    System.out.println(incoming.getMsg().substring(5) + " has left.");
+                    System.out.println(incoming.getMsg() + " has left.");
                 }
                 //System.out.println(incoming);
             }

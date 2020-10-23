@@ -25,6 +25,34 @@ public class Message implements Serializable {
         this.msgHeader = msgHeader;
     }
 
+    public String getMsgHeaderName(int id){
+        switch (id){
+            case 0:
+                return "CHAT";
+            case 1:
+                return "PCHAT";
+            case 2:
+                return "UNMUTE";
+            case 3:
+                return "MUTE";
+            case 4:
+                return "MUTED";
+            case 5:
+                return "NAME";
+            case 6:
+                return "QUIT";
+            case 7:
+                return "SUBMITNAME";
+            case 8:
+                return "WELCOME";
+            case 9:
+                return "EXIT";
+            default:
+                return "No_Header";
+        }
+
+    }
+
     public int getMsgHeader() {
         return msgHeader;
     }

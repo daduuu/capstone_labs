@@ -38,7 +38,7 @@ public class ServerClientHandler implements Runnable{
      */
     public void broadcast(Message msg, String name, boolean only) {
         try {
-            System.out.println("Broadcasting -- " + msg.getMsg());
+            System.out.println("Broadcasting -- " + msg.getMsgHeaderName(msg.getMsgHeader()) + " " +msg.getMsg());
             synchronized (clientList) {
                 for (ClientConnectionData c : clientList){
                     if (c.getUserName().equals(name) == only)
@@ -65,40 +65,40 @@ public class ServerClientHandler implements Runnable{
                 // the client unmute himself or herself.
                 if (incoming.getMsgHeader() == Message.MSG_UNMUTE){
                     client.setMute(false);
-                    broadcast(new Message("UNMUTE", Message.MSG_UNMUTE), client.getUserName(), true);
+                    broadcast(new Message("", Message.MSG_UNMUTE), client.getUserName(), true);
                 }
 
                 // if the client is muted, he or she can't talk and would receive message that he or she is muted
                 else if (client.isMute()){
-                    broadcast(new Message("MUTED", Message.MSG_IS_MUTED), client.getUserName(), true);
+                    broadcast(new Message("", Message.MSG_IS_MUTED), client.getUserName(), true);
                 }
 
                 // default CHAT
                 else if (incoming.getMsgHeader() == Message.MSG_CHAT) {
-                    String chat = incoming.getMsg().substring(4).trim();
+                    String chat = incoming.getMsg().trim();
                     if (chat.length() > 0) {
-                        broadcast(new Message(String.format("CHAT %s %s", client.getUserName(), chat), Message.MSG_CHAT), client.getUserName(), false);
+                        broadcast(new Message(String.format("%s %s", client.getUserName(), chat), Message.MSG_CHAT), client.getUserName(), false);
                     }
                 }
 
                 // if it receives PCHAT
                 else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
-                    String message = incoming.getMsg().substring(5).trim();
+                    String message = incoming.getMsg().trim();
                     int index = message.indexOf(" ");
                     String privUser = message.substring(0,index);
                     String chat = message.substring(index+1);
                     if (chat.length() > 0){
-                        broadcast(new Message(String.format("PCHAT %s %s", client.getUserName(), chat), Message.MSG_PCHAT), privUser, true);
+                        broadcast(new Message(String.format("%s %s", client.getUserName(), chat), Message.MSG_PCHAT), privUser, true);
                     }
                 }
 
                 // if it receives MUTE
                 else if (incoming.getMsgHeader() == Message.MSG_MUTE){
-                    String message = incoming.getMsg().substring(4).trim();
+                    String message = incoming.getMsg().trim();
                     int index = message.indexOf(" ");
                     String username = message.substring(index+1);
 
-                    Message msg = new Message(String.format("MUTE %s", client.getUserName()), Message.MSG_MUTE);
+                    Message msg = new Message(client.getUserName(), Message.MSG_MUTE);
                     synchronized (clientList) {
                         for (ClientConnectionData c : clientList){
                             if (c.getUserName().equals(username)){
@@ -111,16 +111,16 @@ public class ServerClientHandler implements Runnable{
 
                 else if(incoming.getMsgHeader() == Message.MSG_NAME){
                     String temp = incoming.getMsg();
-                    String userName = temp.substring(5).trim();
+                    String userName = temp.trim();
                     boolean unique = true;
                     unique = isUnique(userName, unique);
 
 
                     while (!unique || userName.length() == 0 || userName.split(" ").length != 1 || !(userName.matches("[A-Za-z0-9]+"))){
                         synchronized (clientList){
-                            client.getOut().writeObject(new Message("SUBMITNAME", Message.MSG_SUBMITNAME));
+                            client.getOut().writeObject(new Message("", Message.MSG_SUBMITNAME));
                             temp = ((Message) in.readObject()).getMsg();
-                            userName = temp.substring(5).trim();
+                            userName = temp.trim();
                             unique = isUnique(userName, unique);
 
                         }
@@ -128,7 +128,7 @@ public class ServerClientHandler implements Runnable{
 
                     client.setUserName(userName);
                     //notify all that client has joined
-                    broadcast(new Message(String.format("WELCOME %s", client.getUserName()), Message.MSG_WELCOME), "", false);
+                    broadcast(new Message(client.getUserName(), Message.MSG_WELCOME), "", false);
                 }
 
                 else if (incoming.getMsgHeader() == Message.MSG_QUIT){
@@ -149,7 +149,7 @@ public class ServerClientHandler implements Runnable{
                 clientList.remove(client);
             }
             System.out.println(client.getName() + " has left.");
-            broadcast(new Message(String.format("QUIT %s", client.getUserName()), Message.MSG_QUIT), "", true);
+            broadcast(new Message(client.getUserName(), Message.MSG_QUIT), "", true);
             try {
                 client.getSocket().close();
             } catch (IOException ex) {}

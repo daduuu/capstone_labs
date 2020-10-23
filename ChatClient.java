@@ -59,7 +59,7 @@ public class ChatClient {
 
         while(!line.toLowerCase().startsWith("/quit")) {
             while(!listener.isHasName()) {
-                m = new Message(String.format("NAME %s", name), Message.MSG_NAME);
+                m = new Message(name, Message.MSG_NAME);
                 out.writeObject(m);
                 name = userInput.nextLine().trim();
                 if(listener.isHasName()){
@@ -67,29 +67,29 @@ public class ChatClient {
                 }
             }
             // default CHAT
-            m = new Message(String.format("CHAT %s", line), Message.MSG_CHAT);
+            m = new Message(line, Message.MSG_CHAT);
 
             // If it is a private PCHAT
             if (line.startsWith("@")){
                 int index = line.indexOf(" ");
                 String username = line.substring(1,index);
-                m = new Message(String.format("PCHAT %s %s", username, line.substring(index+1)), Message.MSG_PCHAT);
+                m = new Message(String.format("%s %s", username, line.substring(index+1)), Message.MSG_PCHAT);
             }
 
             else if (line.startsWith("/mute")){
                 int index = line.indexOf(" ");
                 String username = line.substring(index + 1);
-                m = new Message(String.format("MUTE %s", username), Message.MSG_MUTE);
+                m = new Message(username, Message.MSG_MUTE);
             }
 
             else if (line.equals("/unmute")){
-                m = new Message("UNMUTE", Message.MSG_UNMUTE);
+                m = new Message("", Message.MSG_UNMUTE);
             }
 
             out.writeObject(m);
             line = userInput.nextLine().trim();
         }
-        out.writeObject(new Message("QUIT", Message.MSG_QUIT));
+        out.writeObject(new Message("", Message.MSG_QUIT));
         out.close();
         userInput.close();
         socketIn.close();
