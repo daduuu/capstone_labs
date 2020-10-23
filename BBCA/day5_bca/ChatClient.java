@@ -8,8 +8,12 @@ import java.util.Scanner;
 
 public class ChatClient {
     private static Socket socket;
-    public static BufferedReader socketIn;
+    private static BufferedReader socketIn;
     private static PrintWriter out;
+
+    public static BufferedReader getSocketIn() {
+        return socketIn;
+    }
 
     public static void main(String[] args) throws Exception {
         Scanner userInput = new Scanner(System.in);
@@ -29,19 +33,41 @@ public class ChatClient {
         Thread t = new Thread(listener);
         t.start();
 
-        /*while (!listener.hasName){
-            System.out.print("Enter your name: ");
-            String name = userInput.nextLine().trim();
-            out.println("NAME " + name); //out.flush();
-        }*/
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
-        out.println("NAME " + name); //out.flush();
-
+        String temp = String.format("NAME %s", name);
+        out.println(temp);
 
         String line = userInput.nextLine().trim();
         while(!line.toLowerCase().startsWith("/quit")) {
-            String msg = String.format("CHAT %s", line); 
+            // default CHAT
+            String msg = String.format("CHAT %s", line);
+
+            // check if the client has name
+            if (!listener.isHasName()){
+                msg = String.format("NAME %s", line);
+            }
+
+            // Check if it is a private PCHAT
+            else if (line.startsWith("@")){
+                int index = line.indexOf(" ");
+                String username = line.substring(1,index);
+                msg = String.format("PCHAT %s %s", username, line.substring(index+1));
+            }
+
+            // check if the user has typed to mute someone
+            else if (line.startsWith("/mute")){
+                int index = line.indexOf(" ");
+                String username = line.substring(index + 1);
+                msg = String.format("MUTE %s", username);
+            }
+
+            // check if user wants to unmute himself or herself
+            else if (line.equals("/unmute")){
+                msg = "UNMUTE";
+            }
+
+            // send the message out to server
             out.println(msg);
             line = userInput.nextLine().trim();
         }
@@ -50,14 +76,8 @@ public class ChatClient {
         userInput.close();
         socketIn.close();
         socket.close();
-        
+
     }
 
-    public static void name(){
-        Scanner userInput = new Scanner(System.in);
 
-        System.out.print("Enter your name: ");
-        String name = userInput.nextLine().trim();
-        out.println("NAME " + name); //out.flush();
-    }
 }
