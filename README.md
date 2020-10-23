@@ -57,5 +57,3 @@ Our program now has a GUI using javafx. After running the program, you will be a
 We first had to seperate the inner classes into their own classes to prevent merge conflicts. Then we started to see how the code worked, and then implement the requested features, coming up with our own mute feautre.
 
 
-
-
