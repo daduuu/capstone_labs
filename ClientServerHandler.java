@@ -1,9 +1,18 @@
+<<<<<<< HEAD:BBCA/ClientServerHandler.java
 package BBCA3;
+=======
+package bbca;
+
+import java.util.Scanner;
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ClientServerHandler.java
 
 public class ClientServerHandler implements Runnable{
     private boolean hasName = false;
     private boolean first = true;
     private String list;
+
+    public ClientServerHandler(){
+    }
 
     public ClientServerHandler(){
     }
@@ -14,10 +23,13 @@ public class ClientServerHandler implements Runnable{
 
     public void setHasName(boolean hasName) {
         this.hasName = hasName;
+<<<<<<< HEAD:BBCA/ClientServerHandler.java
     }
 
     public String getList(){
         return list;
+=======
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ClientServerHandler.java
     }
 
     @Override
@@ -25,12 +37,17 @@ public class ClientServerHandler implements Runnable{
         try {
             String incoming = "";
 
+<<<<<<< HEAD:BBCA/ClientServerHandler.java
             while( (incoming = ChatClient.getSocketIn().readLine()) != null) {
+=======
+            while( (incoming = bbca.ChatClient.getSocketIn().readLine()) != null) {
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ClientServerHandler.java
                 //handle different headers
                 //WELCOME
                 //CHAT
                 //EXIT
                 //System.out.println(incoming);
+<<<<<<< HEAD:BBCA/ClientServerHandler.java
 
                 if (incoming.startsWith("LIST")){
                     list = incoming;
@@ -46,6 +63,13 @@ public class ClientServerHandler implements Runnable{
                 else if (incoming.equals("SUBMITNAME")){
                     System.out.print("Enter your name: ");
                 }
+=======
+
+
+                if (incoming.equals("SUBMITNAME")){
+                    System.out.print("Enter your name: ");
+                }
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ClientServerHandler.java
                 else if (incoming.startsWith("WELCOME")){
                     hasName = true;
                     System.out.println(incoming.substring(8) + " has joined.");

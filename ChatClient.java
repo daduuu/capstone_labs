@@ -1,4 +1,8 @@
+<<<<<<< HEAD:BBCA/ChatClient.java
 package BBCA3;
+=======
+package bbca;
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -16,11 +20,19 @@ public class ChatClient {
         return socket;
     }
 
+<<<<<<< HEAD:BBCA/ChatClient.java
     public static ObjectInputStream getSocketIn() {
         return socketIn;
     }
 
     public static ObjectOutputStream getOut() {
+=======
+    public static BufferedReader getSocketIn() {
+        return socketIn;
+    }
+
+    public static PrintWriter getOut() {
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
         return out;
     }
 
@@ -49,7 +61,10 @@ public class ChatClient {
         }*/
 
 
+<<<<<<< HEAD:BBCA/ChatClient.java
         out.println("LIST");
+=======
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
         String line = "";
@@ -57,7 +72,11 @@ public class ChatClient {
         while(!line.toLowerCase().startsWith("/quit")) {
             while(!listener.isHasName()) {
                 String temp = String.format("NAME %s", name);
+<<<<<<< HEAD:BBCA/ChatClient.java
                 out.writeObject(temp);
+=======
+                out.println(temp);
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
                 name = userInput.nextLine().trim();
                 if(listener.isHasName()){
                     line = name;
@@ -68,6 +87,7 @@ public class ChatClient {
 
             // If it is a private PCHAT
             if (line.startsWith("@")){
+<<<<<<< HEAD:BBCA/ChatClient.java
                 String[] list = line.split(" ");
                 int numUsers = 0;
                 int index = 0;
@@ -87,6 +107,9 @@ public class ChatClient {
                 }
 
                 /*int index = line.indexOf(" ");
+=======
+                int index = line.indexOf(" ");
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
                 String username = line.substring(1,index);
                 msg = String.format("PCHAT %s %s", username, line.substring(index+1));*/
             }
@@ -110,6 +133,10 @@ public class ChatClient {
                 out.writeObject(msg);
             }
 
+<<<<<<< HEAD:BBCA/ChatClient.java
+=======
+            out.println(msg);
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ChatClient.java
             line = userInput.nextLine().trim();
         }
         out.writeObject("QUIT");
@@ -117,7 +144,7 @@ public class ChatClient {
         userInput.close();
         socketIn.close();
         socket.close();
-
+        
     }
 
 

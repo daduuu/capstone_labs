@@ -1,10 +1,14 @@
+<<<<<<< HEAD:BBCA/ServerClientHandler.java
 package BBCA3;
+=======
+package bbca;
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ServerClientHandler.java
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
 
-import static BBCA.ChatServer.clientList;
+import static bbca.ChatServer.clientList;
 
 
 public class ServerClientHandler implements Runnable{
@@ -81,14 +85,18 @@ public class ServerClientHandler implements Runnable{
             String incoming = "";
 
             while( (incoming = in.readLine()) != null) {
+<<<<<<< HEAD:BBCA/ServerClientHandler.java
                 //System.out.println(incoming);
 
                 if (incoming.equals("LIST")){
                     list();
                 }
+=======
+                System.out.println(incoming);
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ServerClientHandler.java
 
                 // the client unmute himself or herself.
-                else if (incoming.equals("UNMUTE")){
+                if (incoming.equals("UNMUTE")){
                     client.setMute(false);
                     broadcast("UNMUTE", client.getUserName(), true);
                 }
@@ -155,7 +163,10 @@ public class ServerClientHandler implements Runnable{
                     client.setUserName(userName);
                     //notify all that client has joined
                     broadcast(String.format("WELCOME %s", client.getUserName()), "", false);
+<<<<<<< HEAD:BBCA/ServerClientHandler.java
                     list();
+=======
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ServerClientHandler.java
                 }
 
                 else if (incoming.startsWith("QUIT")){
@@ -177,7 +188,10 @@ public class ServerClientHandler implements Runnable{
             }
             System.out.println(client.getName() + " has left.");
             broadcast(String.format("EXIT %s", client.getUserName()), "", true);
+<<<<<<< HEAD:BBCA/ServerClientHandler.java
             list();
+=======
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ServerClientHandler.java
             try {
                 client.getSocket().close();
             } catch (IOException ex) {}

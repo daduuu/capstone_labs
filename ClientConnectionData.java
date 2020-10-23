@@ -1,4 +1,8 @@
+<<<<<<< HEAD:BBCA/ClientConnectionData.java
 package BBCA3;
+=======
+package bbca;
+>>>>>>> 0c6d158225094afb764ad932f472f6648b551708:ClientConnectionData.java
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -68,5 +72,5 @@ public class ClientConnectionData {
         this.userName = userName;
     }
 
-
+    
 }
