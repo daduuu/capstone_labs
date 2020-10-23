@@ -1,17 +1,4 @@
-package BBCA3;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.stage.Stage;
+package BBCA;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +8,26 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
+import java.io.*;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
 /**
  * For Java 8, javafx is installed with the JRE. You can run this program normally.
  * For Java 9+, you must install JavaFX separately: https://openjfx.io/openjfx-docs/
@@ -61,8 +67,8 @@ class ServerInfo {
 
 public class ChatGuiClient extends Application {
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     private Stage stage;
     private TextArea messageArea;
@@ -143,9 +149,9 @@ public class ChatGuiClient extends Application {
 
         //Handle GUI closed event
         stage.setOnCloseRequest(e -> {
-            out.println("QUIT");
-            socketListener.appRunning = false;
             try {
+                out.writeObject(new Message("", Message.MSG_QUIT));
+                socketListener.appRunning = false;
                 socket.close();
             } catch (IOException ex) {}
         });
@@ -173,17 +179,30 @@ public class ChatGuiClient extends Application {
             }
             String chat = message.substring(index+1);
             for (int i = 0; i < numUsers; i++){
-                out.println(String.format("PCHAT %s %s", list[i].substring(1), chat));
+                try {
+                    out.writeObject(new Message(String.format("%s %s", list[i].substring(1), chat), Message.MSG_PCHAT));
+                } catch (Exception e){
+                    System.out.println("ERROR in PCHAT");
+                }
             }
         }
         else{
-            out.println("CHAT " + message);
+            try {
+                out.writeObject(new Message(message, Message.MSG_CHAT));
+            } catch (Exception e){
+                System.out.println("ERROR in CHAT");
+            }
+
         }
     }
 
-    private void mute(){
-        String name = muteWindow();
-        out.println(String.format("MUTE %s", name));
+    private void mute() {
+        try{
+            String name = muteWindow();
+            out.writeObject(new Message(name, Message.MSG_MUTE));
+        } catch (Exception e){
+            System.out.println("ERROR in mute()");
+        }
 
     }
 
@@ -196,43 +215,16 @@ public class ChatGuiClient extends Application {
 
         Optional<String> name = nameDialog.showAndWait();
         return name.get().trim();
-
-        /*// Create a custom dialog for server ip / port
-        Dialog<String> muteUserList = new Dialog<>();
-        muteUserList.setTitle("Mute Usernames List");
-        muteUserList.setHeaderText("Type who you would like to mute: ");
-
-        // Set the button types.
-        ButtonType connectButtonType = new ButtonType("Connect", ButtonData.OK_DONE);
-        muteUserList.getDialogPane().getButtonTypes().addAll(connectButtonType, ButtonType.CANCEL);
-
-        // Create the ip and port labels and fields.
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-
-        TextField textbox = new TextField();
-        textbox.setPromptText("e.g. localhost, 127.0.0.1");
-        grid.add(new Label("Username:"), 0, 0);
-        grid.add(textbox, 1, 0);
-
-        // Enable/Disable connect button depending on whether a address/port was entered.
-        Node connectButton = muteUserList.getDialogPane().lookupButton(connectButtonType);
-        connectButton.setDisable(true);
-
-        muteUserList.getDialogPane().setContent(grid);
-
-        textbox.textProperty().addListener((observable, oldValue, newValue) -> {
-            connectButton.setDisable(newValue.trim().isEmpty());
-        });
-
-        return muteUserList.showAndWait();*/
     }
 
-    private void unmute(){
-        out.println("UNMUTE");
-        unmuteButton.setDisable(true);
+    private void unmute() {
+        try{
+            out.writeObject(new Message("", Message.MSG_UNMUTE));
+            unmuteButton.setDisable(true);
+        } catch (Exception e){
+            System.out.println("ERROR in unmute()");
+        }
+
     }
 
     private Optional<ServerInfo> getServerIpAndPort() {
@@ -325,23 +317,32 @@ public class ChatGuiClient extends Application {
         public void run() {
             try {
                 // Set up the socket for the Gui
-                socket = new Socket(serverInfo.serverAddress, serverInfo.serverPort);
+                /*socket = new Socket(serverInfo.serverAddress, serverInfo.serverPort);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                out = new PrintWriter(socket.getOutputStream(), true);
+                out = new PrintWriter(socket.getOutputStream(), true);*/
+
+                socket = new Socket(serverInfo.serverAddress, serverInfo.serverPort);
+                in = new ObjectInputStream(socket.getInputStream());
+                out = new ObjectOutputStream(socket.getOutputStream());
 
                 appRunning = true;
                 //Ask the gui to show the username dialog and update username
                 //Send to the server
+
                 Platform.runLater(() -> {
-                    out.println("NAME " + getName());
-                    out.println("LIST");
+                    try{
+                        out.writeObject(new Message(getName(), Message.MSG_NAME));
+                        out.writeObject(new Message("", Message.MSG_LIST));
+                    } catch (Exception e) {
+
+                    }
                 });
 
                 //handle all kinds of incoming messages
-                String incoming = "";
-                while (appRunning && (incoming = in.readLine()) != null) {
-                    if (incoming.startsWith("WELCOME")) {
-                        String user = incoming.substring(8);
+                Message incoming;
+                while (appRunning && (incoming = (Message) in.readObject()) != null) {
+                    if (incoming.getMsgHeader() == Message.MSG_WELCOME) {
+                        String user = incoming.getMsg();
                         //got welcomed? Now you can send messages!
                         if (user.equals(username)) {
                             Platform.runLater(() -> {
@@ -362,43 +363,43 @@ public class ChatGuiClient extends Application {
                         Platform.runLater(() -> {
                             messageArea.appendText("You are unmuted. You can talk!\n");
                         });
-                    } else if (incoming.startsWith("MUTE ")){
-                        String name = incoming.substring(5);
+                    } else if (incoming.getMsgHeader() == Message.MSG_MUTE){
+                        String name = incoming.getMsg();
                         Platform.runLater(() -> {
                             messageArea.appendText("You are muted by " + name + ".\n");
                         });
                         unmuteButton.setDisable(false);
-                    } else if (incoming.startsWith("MUTED")) {
+                    } else if (incoming.getMsgHeader() == Message.MSG_IS_MUTED) {
                         Platform.runLater(() -> {
                             messageArea.appendText("You are muted. Click unmute button to unmute yourself.\n");
                         });
-                    } else if (incoming.startsWith("CHAT")) {
-                        int split = incoming.indexOf(" ", 5);
-                        String user = incoming.substring(5, split);
-                        String msg = incoming.substring(split + 1);
+                    } else if (incoming.getMsgHeader() == Message.MSG_CHAT) {
+                        int split = incoming.getMsg().indexOf(" ");
+                        String user = incoming.getMsg().substring(0, split);
+                        String msg = incoming.getMsg().substring(split + 1);
 
                         Platform.runLater(() -> {
                             messageArea.appendText(user + ": " + msg + "\n");
                         });
-                    } else if(incoming.startsWith("PCHAT")){
-                        incoming = incoming.substring(6);
-                        int index = incoming.indexOf(" ");
-                        String user = incoming.substring(0, index);
-                        String msg = incoming.substring(index+1);
+                    } else if (incoming.getMsgHeader() == Message.MSG_PCHAT){
+                        String str = incoming.getMsg();
+                        int index = str.indexOf(" ");
+                        String user = str.substring(0, index);
+                        String msg = str.substring(index+1);
 
                         Platform.runLater(() -> {
                             messageArea.appendText(user + " (private): " + msg + "\n");
                         });
                     }
-                    else if (incoming.startsWith("EXIT")) {
-                        String user = incoming.substring(5);
+                    else if (incoming.getMsgHeader() == Message.MSG_QUIT) {
+                        String user = incoming.getMsg();
                         Platform.runLater(() -> {
-                            messageArea.appendText(user + "has left the chatroom.\n");
+                            messageArea.appendText(user + " has left the chatroom.\n");
                         });
                     }
-                    else if (incoming.startsWith("LIST")){
-                        incoming = incoming.substring(6);
-                        String[] users = incoming.split(", ");
+                    else if (incoming.getMsgHeader() == Message.MSG_LIST){
+                        String incomingstr = incoming.getMsg().substring(6);
+                        String[] users = incomingstr.split(", ");
                         String list = "";
                         for (int i = 0; i < users.length; i++){
                             list += users[i] + "\n";

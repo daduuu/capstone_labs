@@ -1,7 +1,6 @@
-package BBCA3;
+package BBCA;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -49,22 +48,23 @@ public class ChatClient {
         }*/
 
 
-        out.println("LIST");
+        //out.writeObject(new Message("LIST", Message.MSG_LIST));
         System.out.print("Enter your name: ");
         String name = userInput.nextLine().trim();
         String line = "";
+        Message m;
 
         while(!line.toLowerCase().startsWith("/quit")) {
             while(!listener.isHasName()) {
-                String temp = String.format("NAME %s", name);
-                out.writeObject(temp);
+                m = new Message(name, Message.MSG_NAME);
+                out.writeObject(m);
                 name = userInput.nextLine().trim();
                 if(listener.isHasName()){
                     line = name;
                 }
             }
             // default CHAT
-            String msg = String.format("CHAT %s", line);
+            m = new Message(line, Message.MSG_CHAT);
 
             // If it is a private PCHAT
             if (line.startsWith("@")){
@@ -80,39 +80,37 @@ public class ChatClient {
                         break;
                     }
                 }
-                String chat = line.substring(index+1);
-                for (int i = 0; i < numUsers; i++){
-                    msg = String.format("PCHAT %s %s", list[i].substring(1), chat);
-                    out.writeObject(msg);
+                if (index < line.length()){
+                    String chat = line.substring(index+1);
+                    for (int i = 0; i < numUsers; i++){
+                        m = new Message(String.format("%s %s", list[i].substring(1), chat), Message.MSG_PCHAT);
+                        out.writeObject(m);
+                    }
                 }
-
-                /*int index = line.indexOf(" ");
-                String username = line.substring(1,index);
-                msg = String.format("PCHAT %s %s", username, line.substring(index+1));*/
             }
 
             else if (line.startsWith("/mute")){
                 int index = line.indexOf(" ");
                 String username = line.substring(index + 1);
-                msg = String.format("MUTE %s", username);
-                out.writeObject(msg);
+                m = new Message(username, Message.MSG_MUTE);
+                out.writeObject(m);
             }
 
             else if (line.equals("/unmute")){
-                msg = "UNMUTE";
-                out.writeObject(msg);
+                m = new Message("", Message.MSG_UNMUTE);
+                out.writeObject(m);
             }
 
             else if (line.equals("/whoishere")){
                 System.out.println(listener.getList());
             }
             else {
-                out.writeObject(msg);
+                out.writeObject(m);
             }
 
             line = userInput.nextLine().trim();
         }
-        out.writeObject("QUIT");
+        out.writeObject(new Message("", Message.MSG_QUIT));
         out.close();
         userInput.close();
         socketIn.close();
